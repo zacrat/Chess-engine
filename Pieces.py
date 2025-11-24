@@ -50,6 +50,8 @@ class pawn(piece):
                 ToCheckY = ToCheckBlackY
             if not isinstance(board[y+ToCheckY[0]][x], piece):
                 self.posMove.append([y+ToCheckY[0],x])
+                if not isinstance(board[y+2(ToCheckY[0])][x], piece):
+                    self.posMove.append([y+2(ToCheckY[0]),x])
             for i in range(2):
                 if 0<y+ToCheckY[i]<8 and 0<x+ToCheckX[i]<8:
                     checking = board[y+ToCheckY[i]][x+ToCheckX[i]]
