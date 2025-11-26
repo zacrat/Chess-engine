@@ -52,7 +52,7 @@ class pawn(piece):
                 startLevel = 1
             if not isinstance(board[y+ToCheckY[0]][x], piece):
                 self.posMove.append([y+ToCheckY[0],x])
-                if not isinstance(board[y+2*(ToCheckY[0])][x], piece)  and y == startLevel:
+                if not isinstance(board[y+2*(ToCheckY[0])][x], piece) and y == startLevel:
                     self.posMove.append([y+2*(ToCheckY[0]),x])
             for i in range(2):
                 if 0<y+ToCheckY[i]<8 and 0<x+ToCheckX[i]<8:
@@ -60,7 +60,7 @@ class pawn(piece):
                     if isinstance(checking, piece):
                         if checking.colour != self.colour:
                             AttackVal += checking.val
-                            self.posMove.append([y, x+i])
+                            self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
                         else:
                             DefenseVal+= checking.val
 

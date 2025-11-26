@@ -134,8 +134,8 @@ class ChessEngine:
                                 posMate = False
                                 newMoves.append(move)
                         CurPiece.posMove = newMoves
-            if posMate:
-                return True
+        if posMate:
+            return True
 ## add maps to each Piece - done
 ## implement location of attacked/defended/possible positions in check methods - done
 # Pieces.king not defending - fixed

@@ -58,7 +58,8 @@ class Game():
                     y_coord_piece = nums.index(int(move_piece_pos[1]))
                     move_piece = self.bot.board[y_coord_piece][x_coord_piece]
                     print(move_piece)
-                    print(move_piece.posMove)
+                    for move in move_piece.posMove:
+                        print(f"{LTN[move[1]]}{nums[move[0]]}")
                     if move_piece.colour != self.bot.side: piece_valid = True
                 except: pass
             while not move_valid:
