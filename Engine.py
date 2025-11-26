@@ -7,13 +7,16 @@ import Sides
 class ChessEngine:
     def __init__(self, depth, side, position ='RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr'):
         self.position = position
-        self.board = [[' 'for i in range(8)]for _ in range(8)]
-
+        self.board = [[' 'for i in range(8)]for _ in range(8)] #Create board to be used 
         self.side = side
+        #initialize sides
         self.white = Sides.WhiteSide()
         self.black = Sides.BlackSide()
         self.white.enemy = self.black
         self.black.enemy = self.white
+        #initialize sides
+
+        #Turn string input into 2d array board structure
         count = 0
         for y in range(8):
             for x in range(8):
@@ -28,23 +31,22 @@ class ChessEngine:
                     case 'k': self.board[y][x] = Pieces.king(colour)
                     case '#': self.board[y][x] = ' '
                 count += 1
+        
+        #Initialize depth engine
         self.Depth = Depth(depth, self.board, side)
     def print_board(self):
         for row in self.board:   
             print(*row)
     def run(self):
+        #Starts searching at depth
         return self.Depth.start()
     def evaluate(self, pos =None):
-        if not pos: pos = self.board
-        self.white = Sides.WhiteSide()
-        self.black = Sides.BlackSide()
-        self.white.enemy = self.black
-        self.black.enemy = self.white
-        self.get_move_val()
-        self.get_piece_worth()
-        self.get_check()
-        self.white.set_eval()
-        self.black.set_eval()
+        self.get_move_val() #Will asign each piece their possible moves, does not account for illegal moves.
+        self.get_piece_worth() #Gets accumalitive piece worth and asign it to each side
+        self.get_check() #Will get whether any side is in check
+        self.white.set_eval() #Accumuatees each value to a total value to judge the position in terms of this side.
+        self.black.set_eval() #^^^^^^^^^^
+        #Changes side to simulate it being the other side's turn
         if self.side == self.white:return self.white.Eval, self.black.Eval
         else: return self.black.Eval, self.white.Eval
     def get_piece_worth(self): # Collects the cumulative worth of all pieces from each side
@@ -65,12 +67,13 @@ class ChessEngine:
                 Curpiece = self.board[y][x]
                 if isinstance(Curpiece, Pieces.piece):
                     Curpiece.reset()
-                    ValArray = Curpiece.check(x,y,self.board) #Attack, Pos, Defense
+                    ValArray = Curpiece.check(x,y,self.board) # returns Attack, Pos, Defense, PosMoves in that order
                     colour = Curpiece.colour
                     colour.AttackVal += ValArray[0]
                     colour.PosVal += ValArray[1]
                     colour.DefenseVal += ValArray[2]
                     colour.PosMoves += ValArray[3]
+                    #Save king position for each side, makes it easier to see if either side is in check
                     if isinstance(Curpiece, Pieces.king):
                         if isinstance(Curpiece.colour, Sides.WhiteSide):
                             self.white.kingPos = [y,x]
@@ -81,6 +84,7 @@ class ChessEngine:
     def copy_board(self):
         return copy.deepcopy(self.board)
     def get_str_pos(self ,board = None):
+        #Turns the 2d array strucuture back into the string format
         if board == None: board = self.board
         position = ""
         for y in range(8):
@@ -105,9 +109,11 @@ class ChessEngine:
                     elif isinstance(Curpiece,Pieces.king): position+="K"
         return position
     def Update_pos(self,pos):
+        #Used to change the engine's current positions
         self.board = pos
         self.Depth.tree.root = TreeGraph.TreeNode(pos)
     def cleanPos(self):
+        #Removes illegal moves
         board = self.board
         self.evaluate(board) #Used to get the possible moves of current 
         posMate = True
