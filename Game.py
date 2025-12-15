@@ -45,7 +45,7 @@ class Game():
                 return False
             self.curPos = next_move        
         else:
-            self.GenBot.evaluate(self.curPos)  
+            self.GenBot.evaluate(self.curPos)
             if self.GenBot.cleanPos():
                 self.checkmate()
                 return False
@@ -53,15 +53,15 @@ class Game():
             piece_valid= False
             while not piece_valid:
                 move_piece_pos = input("Enter position of the piece you wish to move: ") #Formatted A4, G7 etc
-                try:
-                    x_coord_piece = LTN.index(move_piece_pos[0].lower())
-                    y_coord_piece = nums.index(int(move_piece_pos[1]))
-                    move_piece = self.bot.board[y_coord_piece][x_coord_piece]
-                    print(move_piece)
-                    for move in move_piece.posMove:
-                        print(f"{LTN[move[1]]}{nums[move[0]]}")
-                    if move_piece.colour != self.bot.side: piece_valid = True
-                except: pass
+                x_coord_piece = LTN.index(move_piece_pos[0].lower())
+                y_coord_piece = nums.index(int(move_piece_pos[1]))
+                move_piece = self.bot.board[y_coord_piece][x_coord_piece]
+                if not isinstance(move_piece, Engine.Pieces.piece):
+                    continue
+                print(move_piece)
+                for move in move_piece.posMove:
+                    print(f"{LTN[move[1]]}{nums[move[0]]}")
+                if move_piece.colour != self.bot.side: piece_valid = True
             while not move_valid:
                 try:
                     move_to = input("Enter the position you would like to move: ")#Formatted A4, G7 etc

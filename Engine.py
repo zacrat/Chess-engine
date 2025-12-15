@@ -41,11 +41,16 @@ class ChessEngine:
         #Starts searching at depth
         return self.Depth.start()
     def evaluate(self, pos =None):
-        self.get_move_val() #Will asign each piece their possible moves, does not account for illegal moves.
-        self.get_piece_worth() #Gets accumalitive piece worth and asign it to each side
-        self.get_check() #Will get whether any side is in check
-        self.white.set_eval() #Accumuatees each value to a total value to judge the position in terms of this side.
-        self.black.set_eval() #^^^^^^^^^^
+        if not pos: pos = self.board
+        self.white = Sides.WhiteSide()
+        self.black = Sides.BlackSide()
+        self.white.enemy = self.black
+        self.black.enemy = self.white
+        self.get_move_val()
+        self.get_piece_worth()
+        self.get_check()
+        self.white.set_eval()
+        self.black.set_eval()
         #Changes side to simulate it being the other side's turn
         if self.side == self.white:return self.white.Eval, self.black.Eval
         else: return self.black.Eval, self.white.Eval
@@ -72,7 +77,7 @@ class ChessEngine:
                     colour.AttackVal += ValArray[0]
                     colour.PosVal += ValArray[1]
                     colour.DefenseVal += ValArray[2]
-                    colour.PosMoves += ValArray[3]
+                    colour.PosMoves += ValArray[3]  
                     #Save king position for each side, makes it easier to see if either side is in check
                     if isinstance(Curpiece, Pieces.king):
                         if isinstance(Curpiece.colour, Sides.WhiteSide):
@@ -180,7 +185,6 @@ class Depth(ChessEngine):
             for row in cur.content:
                 print(*row)
             print("_________________")
-            print(cur.getLevel())
             cur = cur.next
     def start(self):
         self.DepthMap(self.tree.root.content, self.tree.root)
