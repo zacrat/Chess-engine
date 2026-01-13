@@ -5,11 +5,8 @@ class piece:
         self.val = val
         self.colour = colour
         self.posMove =[]
-        #self.posAttack= []
-        self.posDefense = []
     def reset(self):
         self.__init__(self.colour, self.val)
-
     def check(self, x, y, board):
         self.check(x, y, board)
 
@@ -67,7 +64,7 @@ class pawn(piece):
                             
             return [AttackVal, PosVal, DefenseVal, self.posMove]
 class rook(piece):
-    def __init__(self, colour = None, val = 5,):
+    def __init__(self, colour = None, hasMoved = False, val = 5,):
         super().__init__(colour, val)
         self.map = [[-0.25,0,0.25,0.5,0.5,0.25,0,-0.25], 
                     [0,0.25,0.5,0.75,0.75,0.5,0.25,0],
@@ -77,6 +74,7 @@ class rook(piece):
                     [0.25,0.75,1.25,1.75,1.75,1.25,0.75,0.25], 
                     [0,0.25,0.5,0.75,0.75,0.5,0.25,0],
                     [-0.25,0,0.25,0.5,0.5,0.25,0,-0.25]]
+        self.hasMoved = hasMoved
         if isinstance(colour, Sides.WhiteSide):self.icon = "\u2656"
         else: self.icon = "\u265C"
     def __str__(self): return self.icon
@@ -287,7 +285,7 @@ class queen(piece):
         DefenseVal = straightVal[2] + DiagVal[2]
         return [AttackVal, PosVal, DefenseVal, self.posMove]
 class king(piece):
-    def __init__(self, colour = None, val = 10):
+    def __init__(self, colour = None, hasMoved = False, val = 10):
         super().__init__(colour,val)
         self.mapWhite = [[-2,-2,-2,-2,-2,-2,-2,-2], 
                     [-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75],
@@ -305,12 +303,14 @@ class king(piece):
                     [-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5], 
                     [-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75],
                     [-2,-2,-2,-2,-2,-2,-2,-2]]
+        self.hasMoved = hasMoved
         if isinstance(colour, Sides.WhiteSide):self.icon = "\u2654"
         else: self.icon = "\u265A"
-    def __str__(self): return self.icon
+    def __str__(self): return self.icon 
     def check(self,x,y,board):
         AttackVal = 0
-        DefenseVal = 0        
+        DefenseVal = 0
+        CastlePositions =  [] 
         ToCheckX = [-1,0,1,1,1,0,-1,-1]
         ToCheckY = [-1,-1,-1,0,1,1,1,0]
         match isinstance(self.colour, Sides.WhiteSide):
@@ -328,4 +328,25 @@ class king(piece):
                         DefenseVal += checking.val
                 else:
                     self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
-        return [AttackVal, PosVal, DefenseVal, self.posMove]
+        if not self.hasMoved:
+            rooksFound = 0
+            castle = False
+            for cX in range(8):
+                Curpiece = board[y][cX]
+                if isinstance(Curpiece,rook):
+                    rooksFound += 1
+                    if Curpiece.hasMoved:
+                        for place in range(x, cX):
+                            if board[y][x] == ' ':
+                                castle = True
+                            else:
+                                castle = False
+                                break
+                        if castle:
+                            kingCastlePos = round((cX+x)/2)
+                            if cX < x: rookCastlePos = kingCastlePos+1
+                            else: rookCastlePos = kingCastlePos-1  
+                            CastlePositions.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])# [What rook to move, Where to move the king, Where to move the rook]
+                if rooksFound == 2:
+                    break
+        return [AttackVal, PosVal, DefenseVal, self.posMove, CastlePositions]

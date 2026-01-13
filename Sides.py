@@ -11,6 +11,7 @@ class Sides:
         self.kingPos = []
         self.king = None
         self.check = False
+        self.CastlePositions = []
 
     def set_eval(self):
         self.Eval = self.pieceVal +self.AttackVal + self.PosVal

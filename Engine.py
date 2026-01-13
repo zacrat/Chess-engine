@@ -31,7 +31,6 @@ class ChessEngine:
                     case 'k': self.board[y][x] = Pieces.king(colour)
                     case '#': self.board[y][x] = ' '
                 count += 1
-        
         #Initialize depth engine
         self.Depth = Depth(depth, self.board, side)
     def print_board(self):
@@ -41,6 +40,7 @@ class ChessEngine:
         #Starts searching at depth
         return self.Depth.start()
     def evaluate(self, pos =None):
+        #self.flip_board()
         if not pos: pos = self.board
         self.white = Sides.WhiteSide()
         self.black = Sides.BlackSide()
@@ -83,9 +83,12 @@ class ChessEngine:
                         if isinstance(Curpiece.colour, Sides.WhiteSide):
                             self.white.kingPos = [y,x]
                             self.white.king = Curpiece
+                            self.white.CastlePositions = ValArray[4]
                         else:
                             self.black.kingPos = [y,x]
                             self.black.king = Curpiece
+                            self.white.CastlePositions = ValArray[4]
+                        
     def copy_board(self):
         return copy.deepcopy(self.board)
     def get_str_pos(self ,board = None):
@@ -137,9 +140,9 @@ class ChessEngine:
                             if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                             elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                             elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour)
+                            elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                             elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour)
+                            elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
                             self.evaluate(newBoard)
                             if not col.check:
                                 posMate = False
@@ -210,9 +213,9 @@ class Depth(ChessEngine):
                                 if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
-                                elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                                 elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
-                                elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
                                 self.evaluate(newBoard)
                                 if not col.check:
                                     posMate = False
@@ -234,12 +237,19 @@ class Depth(ChessEngine):
                             newX = move[1]
                             newBoard[y][x] = ' '
                             if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
-                            elif isinstance(CurPiece,Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour)
+                            elif isinstance(CurPiece,Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                             elif isinstance(CurPiece,Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
                             elif isinstance(CurPiece,Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                             elif isinstance(CurPiece,Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
-                            elif isinstance(CurPiece,Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour)
+                            elif isinstance(CurPiece,Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
                             parent.addChild(newBoard)
+        for places in self.turn.CastlePositions:
+            newBoard = self.copy_board(board)
+            newBoard[places[0][0]][places[0][1]] = ' '
+            newBoard[self.turn.kingPos[0]][self.turn.kingPos[1]] = ' '
+            newBoard[[places[1][0]][places[1][1]]] = Pieces.king(self.turn, True)
+            newBoard[[places[1][0]][places[1][1]]] = Pieces.rook(self.turn, True)
+            parent.addChild(newBoard)
         for child in parent.children:
             self.switch()
             self.DepthMap(child.content,child)
