@@ -61,6 +61,8 @@ class Game():
                 print(move_piece)
                 for move in move_piece.posMove:
                     print(f"{LTN[move[1]]}{nums[move[0]]}")
+                    if len(move) > 2:
+                        print(f"{LTN[move[1][0]]}{nums[move[1][1]]}")
                 if move_piece.colour != self.bot.side: piece_valid = True
             while not move_valid:
                 try:

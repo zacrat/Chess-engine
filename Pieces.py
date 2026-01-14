@@ -1,19 +1,20 @@
 import Sides
 
 class piece:
-    def __init__(self, colour = None, val = 0): # intitalises the piece object with relevant values and properties.
+    def __init__(self, colour = None, val = 0, hasMoved = False): # intitalises the piece object with relevant values and properties.
+        self.hasMoved = hasMoved
         self.val = val
         self.colour = colour
         self.posMove =[]
     def reset(self):
-        self.__init__(self.colour, self.val)
+        self.__init__(self.colour,self.hasMoved, self.val)
     def check(self, x, y, board):
         self.check(x, y, board)
 
 class pawn(piece):
-    def __init__(self, colour=None, val = 1):
+    def __init__(self, colour=None,hasMoved = False, val = 1):
         self.attackMove = [[1,-1],[-1,-1]]
-        super().__init__(colour, val)
+        super().__init__(colour,hasMoved, val)
         self.mapWhite = [[0,0,0,0,0,0,0,0], 
                     [2,2,2,2,2,2,2,2],
                     [1,1.25,1.5,1.75,1.75,1.5,1.25,1], 
@@ -65,7 +66,7 @@ class pawn(piece):
             return [AttackVal, PosVal, DefenseVal, self.posMove]
 class rook(piece):
     def __init__(self, colour = None, hasMoved = False, val = 5,):
-        super().__init__(colour, val)
+        super().__init__(colour,val,hasMoved)
         self.map = [[-0.25,0,0.25,0.5,0.5,0.25,0,-0.25], 
                     [0,0.25,0.5,0.75,0.75,0.5,0.25,0],
                     [0.25,0.75,1.25,1.75,1.75,1.25,0.75,0.25], 
@@ -144,8 +145,8 @@ class rook(piece):
                 except: limYNeg = True
         return [AttackVal, PosVal, DefenseVal, self.posMove]
 class knight(piece):
-    def __init__(self, colour = None, val = 3,):
-        super().__init__(colour, val)
+    def __init__(self, colour = None,hasMoved = False, val = 3,):
+        super().__init__(colour,hasMoved, val)
         self.map = [[-0.75,-0.5,-0.25,0,0,-0.25,-0.5,-0.75], 
                     [-0.5, -0.25, 0,0.25,0.25,0,-0.25,-0.5],
                     [-0.25, 0, 0.25,0.5,0.5,0.25, 0, -0.25], 
@@ -177,8 +178,8 @@ class knight(piece):
                 self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
         return [AttackVal, PosVal, DefenseVal, self.posMove]
 class bishop(piece):
-    def __init__(self, colour = None, val = 3,):
-        super().__init__(colour, val)
+    def __init__(self, colour = None,hasMoved=False, val = 3,):
+        super().__init__(colour,hasMoved, val)
         self.map = [[-1, -0.5, 0, 0.5, 0.5, 0, -0.5, -1], 
                     [-0.5, -0.25, 0, 0.25, 0.25, 0, -0.25, -0.5],
                     [0, 0.25, 0.5, 0.75, 0.75, 0.5, 0.25, 0], 
@@ -261,8 +262,8 @@ class bishop(piece):
                             pass  
         return [AttackVal, PosVal, DefenseVal, self.posMove]
 class queen(piece):
-    def __init__(self, colour = None, val = 9):
-        super().__init__(colour, val)
+    def __init__(self, colour = None,hasMoved=False, val = 9):
+        super().__init__(colour,hasMoved, val)
         self.map = [[0,0.25,0.5,0.75,0.75,0.5,0.25,0],
                     [0.25,0.75,1.25,1.75,1.75,1.25,0.75,0.25],
                     [0.5,1,1.5,2,2,1.5,1,0.5], 
@@ -286,7 +287,7 @@ class queen(piece):
         return [AttackVal, PosVal, DefenseVal, self.posMove]
 class king(piece):
     def __init__(self, colour = None, hasMoved = False, val = 10):
-        super().__init__(colour,val)
+        super().__init__(colour,hasMoved, val)
         self.mapWhite = [[-2,-2,-2,-2,-2,-2,-2,-2], 
                     [-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75],
                     [-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5], 
@@ -328,24 +329,29 @@ class king(piece):
                         DefenseVal += checking.val
                 else:
                     self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
-        if not self.hasMoved:
+        if self.hasMoved == False:
+            #print("---------------")
             rooksFound = 0
             castle = False
             for cX in range(8):
                 Curpiece = board[y][cX]
-                if isinstance(Curpiece,rook):
+                if isinstance(Curpiece,rook) and Curpiece.colour == self.colour:
+                    #print("Rook found at", cX)
                     rooksFound += 1
                     if Curpiece.hasMoved:
-                        for place in range(x, cX):
-                            if board[y][x] == ' ':
+                        for place in range(x+1, cX):
+                            if board[y][place] == ' ':
                                 castle = True
                             else:
                                 castle = False
                                 break
                         if castle:
+                            print("CASTLE FOUND")
                             kingCastlePos = round((cX+x)/2)
-                            if cX < x: rookCastlePos = kingCastlePos+1
-                            else: rookCastlePos = kingCastlePos-1  
+                            if cX < x: rookCastlePos = kingCastlePos
+                            else: rookCastlePos = kingCastlePos
+                            self.posMove.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])
+                            print(self.posMove)
                             CastlePositions.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])# [What rook to move, Where to move the king, Where to move the rook]
                 if rooksFound == 2:
                     break
