@@ -309,6 +309,10 @@ class king(piece):
         else: self.icon = "\u265A"
     def __str__(self): return self.icon 
     def check(self,x,y,board):
+        print("__________________")
+        for row in board:
+            print(*row)
+        print("__________________")
         AttackVal = 0
         DefenseVal = 0
         CastlePositions =  [] 
@@ -336,10 +340,11 @@ class king(piece):
             for cX in range(8):
                 Curpiece = board[y][cX]
                 if isinstance(Curpiece,rook) and Curpiece.colour == self.colour:
-                    #print("Rook found at", cX)
                     rooksFound += 1
                     if Curpiece.hasMoved:
-                        for place in range(x+1, cX):
+                        if cX < x:order = -1
+                        else: order = 1
+                        for place in range(x+order, cX, order):
                             if board[y][place] == ' ':
                                 castle = True
                             else:
@@ -347,11 +352,13 @@ class king(piece):
                                 break
                         if castle:
                             print("CASTLE FOUND")
+                            
                             kingCastlePos = round((cX+x)/2)
-                            if cX < x: rookCastlePos = kingCastlePos
-                            else: rookCastlePos = kingCastlePos
+                            if cX < x: rookCastlePos = kingCastlePos+1
+                            else: rookCastlePos = kingCastlePos-1
                             self.posMove.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])
                             print(self.posMove)
+                            
                             CastlePositions.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])# [What rook to move, Where to move the king, Where to move the rook]
                 if rooksFound == 2:
                     break

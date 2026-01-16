@@ -1,12 +1,11 @@
 import Engine
 import datetime
 class Game():
-    def __init__(self, turn, depth, pos = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"):
+    def __init__(self, turn, depth, pos = "RNBQK##RPPPPPPPP################################pppppppprnbqkbnr"):
         self.white = Engine.Sides.WhiteSide()
         self.black = Engine.Sides.BlackSide()
         self.white.enemy = self.black
         self.black.enemy = self.white
-        self.curPos = None
         self.turn = turn
         now = datetime.datetime.now()
         self.date = now.strftime("%Y-%m-%d")
@@ -14,6 +13,7 @@ class Game():
         self.FileName = f"Chess game on {self.date} at {self.time}.txt"
         self.bot = Engine.ChessEngine(depth, turn, pos)
         self.GenBot = Engine.ChessEngine(1, turn.enemy, pos)
+        self.curPos = self.bot.board
         open(self.FileName,'x')
     def write_move(self):
         with open(self.FileName, 'a') as file:
@@ -61,6 +61,7 @@ class Game():
                 print(move_piece)
                 for move in move_piece.posMove:
                     print(f"{LTN[move[1]]}{nums[move[0]]}")
+                    print(move)
                     if len(move) > 2:
                         print(f"{LTN[move[1][0]]}{nums[move[1][1]]}")
                 if move_piece.colour != self.bot.side: piece_valid = True

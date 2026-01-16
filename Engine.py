@@ -72,6 +72,9 @@ class ChessEngine:
                 Curpiece = self.board[y][x]
                 if isinstance(Curpiece, Pieces.piece):
                     Curpiece.reset()
+                    if self.get_str_pos(self.board)[6] == "R":
+                        print("HERE")
+                        exit()
                     ValArray = Curpiece.check(x,y,self.board) # returns Attack, Pos, Defense, PosMoves in that order
                     colour = Curpiece.colour
                     colour.AttackVal += ValArray[0]
