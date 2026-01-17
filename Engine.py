@@ -72,9 +72,6 @@ class ChessEngine:
                 Curpiece = self.board[y][x]
                 if isinstance(Curpiece, Pieces.piece):
                     Curpiece.reset()
-                    if self.get_str_pos(self.board)[6] == "R":
-                        print("HERE")
-                        exit()
                     ValArray = Curpiece.check(x,y,self.board) # returns Attack, Pos, Defense, PosMoves in that order
                     colour = Curpiece.colour
                     colour.AttackVal += ValArray[0]
@@ -136,16 +133,22 @@ class ChessEngine:
                     if CurPiece.colour == col:
                         newMoves = []
                         for move in CurPiece.posMove:
-                            newY = move[0]
-                            newX = move[1]
                             newBoard = self.copy_board() # Creates a copy of the board to modify without modifying original board
                             newBoard[y][x] = ' '
-                            if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
-                            elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
-                            elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
+                            if len(move) > 2: # [What rook to move, Where to move the king, Where to move the rook]
+                                newBoard[move[2][0]][move[2][1]] = Pieces.rook(CurPiece.colour, True)
+                                newBoard[move[1][0]][move[1][1]] = Pieces.king(CurPiece.colour, True)
+                                newBoard[move[0][0]][move[0][1]] = ' '
+                            else:
+                                newY = move[0]
+                                newX = move[1]
+                                
+                                if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
+                                elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
+                                elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
                             self.evaluate(newBoard)
                             if not col.check:
                                 posMate = False
@@ -195,7 +198,10 @@ class Depth(ChessEngine):
     def start(self):
         self.DepthMap(self.tree.root.content, self.tree.root)
         self.find(self.tree.root)
-        return self.tree.root.next.content
+        try:
+            return self.tree.root.next.content
+        except:
+            return None
     def DepthMap(self,board,parent):
         self.evaluate(board) #Used to get the possible moves of current 
         if self.turn.check or self.turn.enemy.check:
@@ -209,7 +215,8 @@ class Depth(ChessEngine):
                         if CurPiece.colour == col:
                             newMoves = []
                             for move in CurPiece.posMove:
-                                newBoard = self.copy_board(board)# Creates a copy of the board to modify without modifying original board
+                                newBoard = self.copy_board(board) # Creates a copy of the board to modify without modifying original board
+                                newBoard[y][x] = ' '
                                 if len(move) > 2: # [What rook to move, Where to move the king, Where to move the rook]
                                     newBoard[move[2][0]][move[2][1]] = Pieces.rook(CurPiece.colour, True)
                                     newBoard[move[1][0]][move[1][1]] = Pieces.king(CurPiece.colour, True)
@@ -217,7 +224,6 @@ class Depth(ChessEngine):
                                 else:
                                     newY = move[0]
                                     newX = move[1]
-                                    newBoard[y][x] = ' '
                                     if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                                     elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                                     elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
@@ -240,7 +246,8 @@ class Depth(ChessEngine):
                 if isinstance(CurPiece,Pieces.piece):
                     if CurPiece.colour == self.turn:
                         for move in CurPiece.posMove:
-                            newBoard = self.copy_board(board)
+                            newBoard = self.copy_board(board)       
+                            newBoard[y][x] = ' '
                             if len(move) > 2: # [What rook to move, Where to move the king, Where to move the rook]
                                     newBoard[move[2][0]][move[2][1]] = Pieces.rook(CurPiece.colour, True)
                                     newBoard[move[1][0]][move[1][1]] = Pieces.king(CurPiece.colour, True)
@@ -248,7 +255,6 @@ class Depth(ChessEngine):
                             else:
                                 newY = move[0]
                                 newX = move[1]
-                                newBoard[y][x] = ' '
                                 if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                                 elif isinstance(CurPiece,Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                                 elif isinstance(CurPiece,Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)

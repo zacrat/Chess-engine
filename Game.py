@@ -1,7 +1,7 @@
 import Engine
 import datetime
 class Game():
-    def __init__(self, turn, depth, pos = "RNBQK##RPPPPPPPP################################pppppppprnbqkbnr"):
+    def __init__(self, turn, depth, pos = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"):
         self.white = Engine.Sides.WhiteSide()
         self.black = Engine.Sides.BlackSide()
         self.white.enemy = self.black
@@ -59,19 +59,30 @@ class Game():
                 if not isinstance(move_piece, Engine.Pieces.piece):
                     continue
                 print(move_piece)
+                castle_move = []
                 for move in move_piece.posMove:
-                    print(f"{LTN[move[1]]}{nums[move[0]]}")
-                    print(move)
                     if len(move) > 2:
-                        print(f"{LTN[move[1][0]]}{nums[move[1][1]]}")
+                        print(f"{LTN[move[1][1]]}{nums[move[1][0]]}")
+                        castle_move.append(move[1])
+                    else:
+                        print(f"{LTN[move[1]]}{nums[move[0]]}")# [What rook to move, Where to move the king, Where to move the rook]
                 if move_piece.colour != self.bot.side: piece_valid = True
             while not move_valid:
                 try:
                     move_to = input("Enter the position you would like to move: ")#Formatted A4, G7 etc
                     x_coord_move = LTN.index(move_to[0].lower())
                     y_coord_move = nums.index(int(move_to[1]))
-                    if [y_coord_move,x_coord_move] in move_piece.posMove:move_valid = True
+                    trasnslated_move = [y_coord_move, x_coord_move]
+                    if trasnslated_move in move_piece.posMove or castle_move:move_valid = True
                 except: pass
+            if trasnslated_move in castle_move:
+                for move in move_piece.posMove:
+                    if len(move) > 2:
+                        if move[1] == trasnslated_move:
+                            self.curPos[move[1][0]][move[1][1]] = move_piece
+                            self.curPos[move[2][0]][move[2][1]] = self.curPos[move[0][0]][move[0][1]]
+                            self.curPos[move[0][0]][move[0][1]] = ' '
+                            break
             self.curPos[y_coord_piece][x_coord_piece] = ' '
             self.curPos[y_coord_move][x_coord_move] = move_piece
         self.bot.Update_pos(self.curPos)
