@@ -15,7 +15,6 @@ class ChessEngine:
         self.white.enemy = self.black
         self.black.enemy = self.white
         #initialize sides
-
         #Turn string input into 2d array board structure
         count = 0
         for y in range(8):
@@ -36,6 +35,24 @@ class ChessEngine:
     def print_board(self):
         for row in self.board:   
             print(*row)
+    def str_to_board(self, position):
+        #Turns string position into 2d array board structure
+        board = [[' 'for i in range(8)]for _ in range(8)] #Create board to be used 
+        count = 0
+        for y in range(8):
+            for x in range(8):
+                if position[count].isupper(): colour = self.black
+                else: colour = self.white
+                match position[count].lower():
+                    case 'p': board[y][x] = Pieces.pawn(colour)
+                    case 'r': board[y][x] = Pieces.rook(colour, False)
+                    case 'n': board[y][x] = Pieces.knight(colour)
+                    case 'b': board[y][x] = Pieces.bishop(colour)
+                    case 'q': board[y][x] = Pieces.queen(colour)
+                    case 'k': board[y][x] = Pieces.king(colour, False)
+                    case '#': board[y][x] = ' '
+                count += 1
+        return board
     def run(self):
         #Starts searching at depth
         return self.Depth.start()
@@ -54,6 +71,32 @@ class ChessEngine:
         #Changes side to simulate it being the other side's turn
         if self.side == self.white:return self.white.Eval, self.black.Eval
         else: return self.black.Eval, self.white.Eval
+    def REevaluate(self, lines):
+        ready = False
+        prev_eval = 0
+        prev_pos = ""
+        max_diff = 0
+        NO_LIST = []
+        pos_to_evaluate = ""
+        while not ready: 
+            for pos in lines:
+                if pos[0] in NO_LIST:
+                    continue
+                if pos[1]-prev_eval > max_diff:
+                    max_diff = prev_eval - pos[1]
+                    pos_to_evaluate = prev_pos
+                    prev_pos = pos[0]
+            self.Depth.depth = self.Depth.critical_depth
+            self.Update_pos(self.str_to_board(pos_to_evaluate))
+            new_pos = self.run()
+            new_eval = self.evaluate(new_pos)[0]
+            if new_eval >= prev_eval :
+                ready = True
+                break
+            else:
+                NO_LIST.append(prev_pos)
+        with open("Data.txt",'a') as file:
+            file.write(f"{pos_to_evaluate}:{new_pos}\n")
     def get_piece_worth(self): # Collects the cumulative worth of all pieces from each side
         for y in range(8):
             for x in range(8):
@@ -132,6 +175,8 @@ class ChessEngine:
                 if isinstance(CurPiece, Pieces.piece):
                     if CurPiece.colour == col:
                         newMoves = []
+                        print(CurPiece)
+                        print(CurPiece.posMove)
                         for move in CurPiece.posMove:
                             newBoard = self.copy_board() # Creates a copy of the board to modify without modifying original board
                             newBoard[y][x] = ' '
@@ -142,7 +187,6 @@ class ChessEngine:
                             else:
                                 newY = move[0]
                                 newX = move[1]
-                                
                                 if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
@@ -150,10 +194,15 @@ class ChessEngine:
                                 elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
                             self.evaluate(newBoard)
+                            for row in newBoard:
+                                print(*row)
+                            print(col.check)
                             if not col.check:
                                 posMate = False
                                 newMoves.append(move)
+                            #print(newMoves)
                         CurPiece.posMove = newMoves
+
         if posMate:
             return True
 ## add maps to each Piece - done
@@ -177,6 +226,7 @@ class ChessEngine:
 class Depth(ChessEngine):
     def __init__(self, depth, board, side):
         self.depth = depth
+        self.critical_depth = depth + 1
         self.side = side
         self.white = Sides.WhiteSide()
         self.black = Sides.BlackSide()

@@ -7,7 +7,7 @@ black = Engine.Sides.BlackSide()
 white.enemy = black
 black.enemy = white
 def main():
-    print("START ************************")
+    print("START")
     running = True
     Start = Game.Game(white, 2)
     while running:

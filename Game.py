@@ -15,9 +15,18 @@ class Game():
         self.GenBot = Engine.ChessEngine(1, turn.enemy, pos)
         self.curPos = self.bot.board
         open(self.FileName,'x')
+        try:
+            open("Data.txt",'a')
+        except:
+            open("Data.txt",'x')
+        with open("Data.txt",'r') as file:
+            self.lines = file.readlines()
+            self.data = []
+            for line in self.lines:
+                self.data.append(line.split(":"))
     def write_move(self):
         with open(self.FileName, 'a') as file:
-            file.write(self.bot.get_str_pos(self.curPos)+"\n")
+            file.write(f"{self.bot.get_str_pos(self.curPos)}:{self.bot.evaluate(self.curPos)[0]}\n")
             file.close()
     def checkmate(self):
         with open(self.FileName, 'a') as file:
@@ -28,6 +37,12 @@ class Game():
             else:
                 file.write("The game is a draw")
             file.close()
+        if self.bot.side.check:
+            lines = []
+            with open(self.FileName,'r') as file:
+                for line in file.readlines:
+                    lines.append(line.split(":"))
+            self.bot.REevaluate(lines)
         return False
     def play(self):
         self.write_move()
@@ -37,8 +52,15 @@ class Game():
             nums = nums.reverse()
             LTN = LTN.reverse()
         if self.turn == self.bot.side:
-            self.bot.evaluate(self.curPos)
-            next_move = self.bot.run()
+            try:
+                for move in self.data:
+                    if move[0] == self.bot.get_str_pos(self.curPos):
+                        next_move = self.bot.str_to_board(move[1])
+                        break
+                raise Exception  
+            except:    
+                self.bot.evaluate(self.curPos)
+                next_move = self.bot.run()
             if next_move == None:
                 print("Game ended")
                 self.checkmate()
