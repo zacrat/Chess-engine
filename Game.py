@@ -40,7 +40,7 @@ class Game():
         if self.bot.side.check:
             lines = []
             with open(self.FileName,'r') as file:
-                for line in file.readlines:
+                for line in file.readlines():
                     lines.append(line.split(":"))
             self.bot.REevaluate(lines)
         return False
@@ -53,11 +53,20 @@ class Game():
             LTN = LTN.reverse()
         if self.turn == self.bot.side:
             try:
-                for move in self.data:
-                    if move[0] == self.bot.get_str_pos(self.curPos):
-                        next_move = self.bot.str_to_board(move[1])
-                        break
-                raise Exception  
+                print("Bot is looking for moves from data...")
+                with open("Data.txt",'r') as file:
+                    data = file.readlines()
+                    for line in data:
+                        move = line.split(":")
+                        for row in self.bot.str_to_board(move[0]):
+                            print(*row)
+                        if move[0] == self.bot.get_str_pos(self.curPos):
+                            next_move = self.bot.str_to_board(move[1])
+                            print("Move found in data!")
+                            move_found = True
+                            break
+                if not move_found:
+                    raise Exception  
             except:    
                 self.bot.evaluate(self.curPos)
                 next_move = self.bot.run()
