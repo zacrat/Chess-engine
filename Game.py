@@ -10,10 +10,11 @@ class Game():
         now = datetime.datetime.now()
         self.date = now.strftime("%Y-%m-%d")
         self.time = now.strftime("%H-%M-%S")
-        self.FileName = f"Chess game on {self.date} at {self.time}.txt"
+        self.FileName = f"Past_games/Chess game on {self.date} at {self.time}.txt"
         self.bot = Engine.ChessEngine(depth, turn, pos)
         self.GenBot = Engine.ChessEngine(1, turn.enemy, pos)
         self.curPos = self.bot.board
+        self.ongoing = True
         open(self.FileName,'x')
         try:
             open("Data.txt",'a')
@@ -43,7 +44,7 @@ class Game():
                 for line in file.readlines():
                     lines.append(line.split(":"))
             self.bot.REevaluate(lines)
-        return False
+        self.ongoing = False
     def play(self):
         self.write_move()
         LTN = ["a","b","c","d","e","f","g","h"]
