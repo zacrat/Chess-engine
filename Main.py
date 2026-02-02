@@ -31,14 +31,27 @@ def play_game():
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 col = (mouse_x // SQUARE_SIZE)
                 row = (mouse_y // SQUARE_SIZE)
+                for move in possible_moves:
+                    from_pos = (selected_square[0], selected_square[1])
+                    if len(move) > 2:# [What rook to move, Where to move the king, Where to move the rook] 
+                        if move[1] == [row, col]:                   
+                            Start.player_queue.put((move[0], move[1], move[2], from_pos)) 
+                            possible_moves = []
+                            break
+                    else:
+                        r, c = move
+                        if [r, c] == [row, col] and selected_square != None:
+                            to_pos = (row, col)
+                            Start.player_queue.put((from_pos, to_pos))
+                            selected_square = None
+                            possible_moves = []
+                            break
                 if [row, col] == selected_square:
-                    selected_square = None
-                elif [row, col] in possible_moves:
-                    Start.player_queue.put((selected_square, [row, col]))
                     selected_square = None
                     possible_moves = []
                 else:
                     selected_square = [row, col]
+                    possible_moves = []
         for row in range(8):    
             for col in range(8):
                 symbol = cur_pos[row][col].__str__()
