@@ -36,6 +36,7 @@ def play_game():
                 elif [row, col] in possible_moves:
                     Start.player_queue.put((selected_square, [row, col]))
                     selected_square = None
+                    possible_moves = []
                 else:
                     selected_square = [row, col]
         for row in range(8):    
@@ -52,7 +53,7 @@ def play_game():
                         possible_moves = piece.posMove
                 else:
                     color = LIGHT if (row + col) % 2 == 0 else DARK
-                pygame.draw.rect(
+                    pygame.draw.rect(
                     screen,
                     color,
                     (col * SQUARE_SIZE, row * SQUARE_SIZE,
@@ -73,6 +74,7 @@ def play_game():
                 (0, 255, 0),
                 (c * SQUARE_SIZE + SQUARE_SIZE // 2, r * SQUARE_SIZE + SQUARE_SIZE // 2),
                 SQUARE_SIZE // 4)
+        
         pygame.display.flip()
         clock.tick(60)
 def pgn_import():
