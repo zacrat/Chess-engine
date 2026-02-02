@@ -2,7 +2,7 @@ import chess.pgn
 import chess
 from io import StringIO
 
-def PGN_SCAN(path):
+def scan(path):
     vboard = chess.Board()
     pgn = open(path, 'r')
     pgn_lines = StringIO(pgn.read())
@@ -33,4 +33,3 @@ def check_int(chr):
         return True
     except ValueError:
         return False
-PGN_SCAN("PGN_files/Carlsen.pgn")
