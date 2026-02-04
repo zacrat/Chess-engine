@@ -35,8 +35,9 @@ def play_game():
                     from_pos = (selected_square[0], selected_square[1])
                     if len(move) > 2:# [What rook to move, Where to move the king, Where to move the rook] 
                         if move[1] == [row, col]:                   
-                            Start.player_queue.put((move[0], move[1], move[2], from_pos)) 
-                            possible_moves = []
+                            Start.player_queue.put((move[0], move[1], move[2], from_pos))
+                            selected_square = None
+                            possible_moves = [] 
                             break
                     else:
                         r, c = move
@@ -45,7 +46,7 @@ def play_game():
                             Start.player_queue.put((from_pos, to_pos))
                             selected_square = None
                             possible_moves = []
-                            break
+                            break           
                 if [row, col] == selected_square:
                     selected_square = None
                     possible_moves = []
