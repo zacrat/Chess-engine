@@ -39,6 +39,8 @@ def play_game():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if Flip_button.is_clicked(event):
                     flipped = not flipped
+                if Home_button.is_clicked(event):
+                    return
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 col = (mouse_x // SQUARE_SIZE)
                 row = (mouse_y // SQUARE_SIZE) 
@@ -97,6 +99,7 @@ def play_game():
             pygame.draw.circle(screen,  (0, 255, 0),(c * SQUARE_SIZE + SQUARE_SIZE // 2, r * SQUARE_SIZE + SQUARE_SIZE // 2),SQUARE_SIZE // 4)
         info = ["Bot depth : "+str(Start.bot.Depth.depth), "Date : " + str(Start.date), "Time : " + str(Start.time), "Turn : " + str(Start.turn), "Player side : " +str(Start.GenBot.side)]
         Flip_button.draw(screen)
+        Home_button.draw(screen)
         INFO_BOX.draw(screen, info)
         pygame.display.flip()
         clock.tick(60)
@@ -129,7 +132,7 @@ def pgn_import():
         PGN_importer.scan(path)
 
 def open_data():
-    path = "App_data/Data.txt"
+    path = "App_data\Data.txt"
     os.startfile(path)
 #colours
 LIGHT = (240, 217, 181)
@@ -152,15 +155,16 @@ Start_button = UI.button(play_game, 100, 120, 200, 75, "Play Game")
 Import_PGN_button = UI.button(pgn_import, 100, 220, 200, 75, "Import PGN")
 Open_data_button = UI.button(open_data, 100, 320, 200, 75, "Open training data")
 Settings = UI.button(open_settings,100, 420, 200, 75, "Settings")
-Exit_button = UI.button(sys.exit, 100, 520, 200, 75, "Exit")
+Exit_button = UI.button(sys.exit, 100, 420, 200, 75, "Exit")
 Flip_button = UI.button(None,740,290, 500, 50,"Flip board")
+Home_button = UI.button(None,740,360, 500, 50,"Home")
 #Menu UI
 INFO_BOX = UI.TextBox(740,60,500,210,"Game details",(120,120,120),font_console)
 Title = UI.TextBox(res_w//8, res_h//32, res_w//(8/6), 80, "", (255,255,255), font)
 
 def main():
     running = True
-    buttons = [Start_button, Exit_button, Import_PGN_button, Open_data_button, Settings]
+    buttons = [Start_button, Exit_button, Import_PGN_button, Open_data_button]
     while running == True:
         screen.fill(BACKGROUND)
         Title.draw(screen, "-----Welcome to my chess engine-----")
