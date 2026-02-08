@@ -166,6 +166,7 @@ class ChessEngine:
         #Used to change the engine's current positions
         self.board = pos
         self.Depth.tree.root = TreeGraph.TreeNode(pos)
+    
     def cleanPos(self):
         #Removes illegal moves
         board = self.board
@@ -198,6 +199,8 @@ class ChessEngine:
                             if not col.check:
                                 posMate = False
                                 newMoves.append(move)
+                            else:print("Move removed for" + str(CurPiece))
+                        CurPiece.posMove = []
                         CurPiece.posMove = newMoves
 
         if posMate:

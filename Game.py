@@ -65,6 +65,7 @@ class Game():
     def play(self):
         self.write_move()
         if self.turn == self.bot.side:
+            move_found = False
             try:
                 with open("App_data/Data.txt",'r') as file:
                     data = file.readlines()
@@ -87,8 +88,8 @@ class Game():
                 self.checkmate()
             self.curPos = next_move        
         else:
-            self.GenBot.evaluate(self.curPos)
-            if self.GenBot.cleanPos():
+            checkmate = self.GenBot.cleanPos()
+            if checkmate:
                 self.checkmate()
             piece_valid= False
             while not piece_valid:

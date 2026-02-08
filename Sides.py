@@ -16,7 +16,18 @@ class Sides:
         self.Eval = self.pieceVal +self.AttackVal + self.PosVal
 
     def reset(self):
-        self.__init__(self.enemy)
+        self.Eval = None
+        self.pieceVal = 0
+        self.AttackVal = 0
+        self.DefenseVal = 0
+        self.PosVal = 0
+        self.PosMoves = []
+        self.PosAttack = list()
+        self.PosDefence = list()
+        self.kingPos = []
+        self.king = None
+        self.check = False
+        self.CastlePositions = []
 
 
 class WhiteSide(Sides):
