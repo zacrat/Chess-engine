@@ -17,9 +17,17 @@ class TextBox():
     def draw(self, screen, content):
         pygame.draw.rect(screen, self.colour, self.rect)
         pygame.draw.rect(screen, self.border_colour, self.border, 4)
-        screen.blit(self.header, (self.x-20, self.y-60))
-        data = self.font.render(content, True, (0,0,0))
-        screen.blit(data, (self.x, self.y))
+        screen.blit(self.header, (self.x-4, self.y-60))
+        if isinstance(content, list):
+            x = self.x
+            y = self.y
+            for data in content:
+                message = self.font.render(data+"\n", True, (0,0,0))
+                screen.blit(message, (x, y))
+                y = y+40
+        else:
+            data = self.font.render(content, True, (0,0,0))
+            screen.blit(data, (self.x, self.y))
 
 class button:
     def __init__(self,function, x, y, width, height, text='', colour_idle=(255, 255, 255), colour_hover=(200, 200, 200), font_size=30):
@@ -48,8 +56,6 @@ class button:
             if self.rect.collidepoint(mouse_pos):
                 return True
         return False
-
-
 
 def choose_file():
     file_path = filedialog.askopenfilename()

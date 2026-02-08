@@ -18,7 +18,9 @@ class Game():
         self.curPos = self.bot.board
         self.ongoing = True
         self.player_queue = queue.Queue()
+        self.prev_moves = []
         self.winner = None
+        self.learning = False
         open(self.FileName,'x')
         try:
             open("App_data/Data.txt",'a')
@@ -33,8 +35,10 @@ class Game():
         with open(self.FileName, 'a') as file:
             file.write(f"{self.bot.get_str_pos(self.curPos)}:{self.bot.evaluate(self.curPos)[0]}\n")
             file.close()
+        self.prev_moves.append(self.bot.get_str_pos(self.curPos))
     def checkmate(self):
         with open(self.FileName, 'a') as file:
+            self.ongoing = False
             if self.white.check:
                 file.write("Black Won by checkmate")
                 self.winner = self.black
@@ -51,10 +55,13 @@ class Game():
                 for line in file.readlines():
                     lines.append(line.split(":"))
                 file.close()
-            with open("App_data/Recently_evaluated.txt") as file:
-                file.write(self.FileName)
+            with open("App_data/Recently_evaluated.txt", "a") as file:
+                file.write(self.FileName+ "\n")
+                file.close()
+            self.learning = True
             self.bot.REevaluate(lines)
-        self.ongoing = False
+            self.learning = False
+        
     def play(self):
         self.write_move()
         if self.turn == self.bot.side:
@@ -71,9 +78,10 @@ class Game():
                             break
                 if not move_found:
                     raise Exception  
-            except:    
-                self.bot.evaluate(self.curPos)
+            except:
                 next_move = self.bot.run()
+                self.bot.Depth.board_count = 0
+                self.bot.Depth.boards_analysed = 0
             if next_move == None:
                 print("Game ended")
                 self.checkmate()

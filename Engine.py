@@ -102,7 +102,7 @@ class ChessEngine:
                 break
             else:
                 NO_LIST.append(prev_pos)
-        with open("Data.txt",'a') as file:
+        with open("App_data/Data.txt",'a') as file:
             file.write(f"{pos_to_evaluate}:{self.get_str_pos(new_pos)}\n")
             file.close()
     def get_piece_worth(self): # Collects the cumulative worth of all pieces from each side
@@ -131,14 +131,9 @@ class ChessEngine:
                     colour.PosMoves += ValArray[3]  
                     #Save king position for each side, makes it easier to see if either side is in check
                     if isinstance(Curpiece, Pieces.king):
-                        if isinstance(Curpiece.colour, Sides.WhiteSide):
-                            self.white.kingPos = [y,x]
-                            self.white.king = Curpiece
-                            self.white.CastlePositions = ValArray[4]
-                        else:
-                            self.black.kingPos = [y,x]
-                            self.black.king = Curpiece
-                            self.white.CastlePositions = ValArray[4]
+                        Curpiece.colour.kingPos = [y,x]
+                        Curpiece.colour.king  = Curpiece
+                        Curpiece.colour.CastlePositions = ValArray[4]
                         
     def copy_board(self):
         return copy.deepcopy(self.board)
@@ -236,6 +231,8 @@ class Depth(ChessEngine):
         self.black.enemy = self.white
         self.board = board
         self.turn = side
+        self.board_count = 0
+        self.boards_analysed = 0
         self.tree = TreeGraph.Tree(TreeGraph.TreeNode(self.board))
     def copy_board(self, board):
         self.board = board
@@ -255,6 +252,7 @@ class Depth(ChessEngine):
         except:
             return None
     def DepthMap(self,board,parent):
+        self.board_count += 1
         self.evaluate(board) #Used to get the possible moves of current 
         if self.turn.check or self.turn.enemy.check:
             posMate = True
@@ -327,6 +325,7 @@ class Depth(ChessEngine):
         self.board = board
         return super().get_str_pos()
     def find(self, cur): # Assume opposition will play best move
+        self.boards_analysed += 1
         depth = cur.getLevel()
         if cur.children:
             evals = []
@@ -350,5 +349,5 @@ class Depth(ChessEngine):
             AllyVal, EnemyVal = self.evaluate(cur.content)
             if cur.checkmate:
                 if depth % 2 == 0: EnemyVal+= 1000-depth
-                else: AllyVal += 1000-depth
+                else: AllyVal += 1000-depth            
             return round((AllyVal/EnemyVal), 2)

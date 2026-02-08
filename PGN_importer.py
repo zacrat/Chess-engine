@@ -27,6 +27,30 @@ def FEN_to_STR(fen):
             else:
                 str_form = str_form + chr.upper()
     return str_form
+def STR_to_FEN(string):
+    fen_form = ""
+    count=0
+    curr_streak = 0
+    for chr in string:
+        if count == 8:
+            if curr_streak>0:
+                fen_form = fen_form + str(curr_streak)
+                curr_streak = 0
+            fen_form = fen_form + "/"
+            count = 0 
+        if chr == "#":
+            curr_streak += 1
+        elif chr != "#":
+            if curr_streak > 0:
+                fen_form = fen_form + str(curr_streak)
+                curr_streak = 0
+            if chr.isupper():
+                fen_form = fen_form + chr.lower()
+            else:
+                fen_form = fen_form + chr.upper()
+        count+=1
+    return fen_form
+
 def check_int(chr):
     try:
         int(chr)
