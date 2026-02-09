@@ -120,8 +120,15 @@ def play_game():
                 root.withdraw()
                 res=messagebox.askquestion('Exit Application', 'The engine is currently analysing the game, do you wish to exit?')
                 if res == 'yes':
-                    root.destroy()
                     sys.exit()
+                root.destroy()
+            if Home_button.is_clicked(event):
+                root = tk.Tk()
+                root.withdraw()
+                res=messagebox.askquestion('Exit Application', 'The engine is currently analysing the game, do you wish to exit?')
+                if res == 'yes':
+                    return
+                root.destroy()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
         pygame.display.flip()
@@ -146,7 +153,6 @@ pygame.display.set_caption("Chess Engine")
 screen = pygame.display.set_mode((res_w, res_h))
 SQUARE_SIZE = 720 // 8 # Size of each square on the chessboard. Rest of the screen for menu UI at 720px right.
 clock = pygame.time.Clock()  
-
 #fonts
 font = pygame.font.SysFont("Segoe UI Symbol", 56)
 font_console = pygame.font.SysFont("console", 34)
@@ -181,5 +187,4 @@ def main():
         clock.tick(60)
     pygame.quit()
     sys.exit()
-
 main()
