@@ -97,7 +97,13 @@ def play_game():
                 r = 7-r
                 c = 7-c
             pygame.draw.circle(screen,  (0, 255, 0),(c * SQUARE_SIZE + SQUARE_SIZE // 2, r * SQUARE_SIZE + SQUARE_SIZE // 2),SQUARE_SIZE // 4)
-        info = ["Bot depth : "+str(Start.bot.Depth.depth), "Date : " + str(Start.date), "Time : " + str(Start.time), "Turn : " + str(Start.turn), "Player side : " +str(Start.GenBot.side)]
+        info = [
+            "Bot depth : "+str(Start.bot.Depth.depth), 
+            "Date : " + str(Start.date), 
+            "Time : " + str(Start.time), 
+            "Turn : " + str(Start.turn), 
+            "Player side : " +str(Start.GenBot.side),
+            "Bot progress : " + str(Start.bot.Depth.boards_analysed) + " / " + str(Start.bot.Depth.board_count)]
         Flip_button.draw(screen)
         Home_button.draw(screen)
         INFO_BOX.draw(screen, info)
@@ -161,11 +167,11 @@ Start_button = UI.button(play_game, 100, 120, 200, 75, "Play Game")
 Import_PGN_button = UI.button(pgn_import, 100, 220, 200, 75, "Import PGN")
 Open_data_button = UI.button(open_data, 100, 320, 200, 75, "Open training data")
 Settings = UI.button(open_settings,100, 420, 200, 75, "Settings")
-Exit_button = UI.button(sys.exit, 100, 420, 200, 75, "Exit")
-Flip_button = UI.button(None,740,290, 500, 50,"Flip board")
-Home_button = UI.button(None,740,360, 500, 50,"Home")
+Exit_button = UI.button(sys.exit, 100, 460, 200, 75, "Exit")
+Flip_button = UI.button(None,740,330, 500, 50,"Flip board")
+Home_button = UI.button(None,740,400, 500, 50,"Home")
 #Menu UI
-INFO_BOX = UI.TextBox(740,60,500,210,"Game details",(120,120,120),font_console)
+INFO_BOX = UI.TextBox(740,60,500,250,"Game details",(120,120,120),font_console)
 Title = UI.TextBox(res_w//8, res_h//32, res_w//(8/6), 80, "", (255,255,255), font)
 
 def main():

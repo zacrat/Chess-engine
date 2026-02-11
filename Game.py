@@ -1,6 +1,7 @@
 import Engine
 import datetime
 import queue
+from multiprocessing import Process
 
 class Game():
     def __init__(self, turn, depth, pos = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"):
@@ -21,6 +22,8 @@ class Game():
         self.prev_moves = []
         self.winner = None
         self.learning = False
+        self.idle_eval = False
+        self.idle_process = Process(target=self.idle_evaluation)
         open(self.FileName,'x')
         try:
             open("App_data/Data.txt",'a')
@@ -31,6 +34,13 @@ class Game():
             self.data = []
             for line in self.lines:
                 self.data.append(line.split(":"))
+    def idle_evaluation(self):
+        self.bot.Depth.depth = self.bot.Depth.depth + 1
+        self.bot.Depth.DepthMap()
+        tree = self.bot.Depth.tree
+        self.idle_eval_tree = tree.root
+        self.idle_eval = True
+
     def write_move(self):
         with open(self.FileName, 'a') as file:
             file.write(f"{self.bot.get_str_pos(self.curPos)}:{self.bot.evaluate(self.curPos)[0]}\n")
@@ -65,6 +75,7 @@ class Game():
     def play(self):
         self.write_move()
         if self.turn == self.bot.side:
+            self.idle_process.terminate()
             move_found = False
             try:
                 with open("App_data/Data.txt",'r') as file:
@@ -80,7 +91,11 @@ class Game():
                 if not move_found:
                     raise Exception  
             except:
-                next_move = self.bot.run()
+                if self.idle_eval:
+                    self.bot.Depth.find()
+                    next_move = self.bot.Depth.tree.root.next.next
+                else:
+                    next_move = self.bot.run()
                 self.bot.Depth.board_count = 0
                 self.bot.Depth.boards_analysed = 0
             if next_move == None:
