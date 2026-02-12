@@ -7,7 +7,7 @@ import Sides
 class ChessEngine:
     def __init__(self, depth, side, position ='RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr'):
         self.position = position
-        self.board = [[' 'for i in range(8)]for _ in range(8)] #Create board to be used 
+        self.board = [[' 'for _ in range(8)]for _ in range(8)] #Create board to be used 
         self.side = side
         #initialize sides
         self.white = Sides.WhiteSide()
@@ -37,7 +37,7 @@ class ChessEngine:
             print(*row)
     def str_to_board(self, position):
         #Turns string position into 2d array board structure
-        board = [[' 'for i in range(8)]for _ in range(8)] #Create board to be used 
+        board = [[' 'for _ in range(8)]for _ in range(8)] #Create board to be used 
         count = 0
         for y in range(8):
             for x in range(8):
@@ -139,7 +139,7 @@ class ChessEngine:
         return copy.deepcopy(self.board)
     def get_str_pos(self ,board = None):
         #Turns the 2d array strucuture back into the string format
-        if board == None: board = self.board
+        if board is None: board = self.board
         position = ""
         for y in range(8):
             for x in range(8):
@@ -147,7 +147,7 @@ class ChessEngine:
                 if Curpiece == ' ':
                     position += "#"
                     continue
-                if Curpiece.colour == self.white:
+                if Curpiece.colour == Sides.WhiteSide():
                     if isinstance(Curpiece, Pieces.pawn): position +="p"
                     elif isinstance(Curpiece,Pieces.rook): position+="r"
                     elif isinstance(Curpiece,Pieces.knight): position+="n"
@@ -176,8 +176,7 @@ class ChessEngine:
         for y in range(8):
             for x in range(8):
                 CurPiece = board[y][x]
-                if isinstance(CurPiece, Pieces.piece):
-                    if CurPiece.colour == col:
+                if isinstance(CurPiece, Pieces.piece) and CurPiece.colour == col:
                         newMoves = []
                         for move in CurPiece.posMove:
                             newBoard = self.copy_board() # Creates a copy of the board to modify without modifying original board
@@ -252,7 +251,7 @@ class Depth(ChessEngine):
         self.find(self.tree.root)
         try:
             return self.tree.root.next.content
-        except:
+        except Exception:
             return None
     def DepthMap(self,board,parent):
         self.board_count += 1
@@ -264,8 +263,7 @@ class Depth(ChessEngine):
             for y in range(8):
                 for x in range(8):
                     CurPiece = board[y][x]
-                    if isinstance(CurPiece, Pieces.piece):
-                        if CurPiece.colour == col:
+                    if isinstance(CurPiece, Pieces.piece) and CurPiece.colour == col:
                             newMoves = []
                             for move in CurPiece.posMove:
                                 newBoard = self.copy_board(board) # Creates a copy of the board to modify without modifying original board
@@ -292,13 +290,13 @@ class Depth(ChessEngine):
                 parent.checkmate = True
         try:
             if parent.getLevel() == self.depth: return
-        except:pass
+        except Exception:
+            pass
         for y in range(8):
             for x in range(8):
                 CurPiece = board[y][x]
-                if isinstance(CurPiece,Pieces.piece):
-                    if CurPiece.colour == self.turn:
-                        for move in CurPiece.posMove:
+                if isinstance(CurPiece, Pieces.piece) and CurPiece.colour == self.turn:
+                    for move in CurPiece.posMove:
                             newBoard = self.copy_board(board)       
                             newBoard[y][x] = ' '
                             if len(move) > 2: # [What rook to move, Where to move the king, Where to move the rook]
@@ -336,16 +334,16 @@ class Depth(ChessEngine):
             minEval = 10000000000000
             for child in cur.children:
                 evals.append(self.find(child))
-                for i in range(len(evals)):
+                for eval_val in evals:
                     if depth % 2 == 0: # if the depth of the current position is even that means it is the original side's turn
-                        if evals[i] > maxEval:
+                        if eval_val > maxEval:
                             cur.next = child
-                            maxEval = evals[i]
+                            maxEval = eval_val
                         val = maxEval
                     else:
-                        if evals[i] < minEval:
+                        if eval_val < minEval:
                             cur.next = child
-                            minEval = evals[i]
+                            minEval = eval_val
                         val = minEval
             return val
         else:

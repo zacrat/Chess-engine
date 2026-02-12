@@ -6,8 +6,8 @@ class Sides:
         self.DefenseVal = 0
         self.PosVal = 0
         self.PosMoves = []
-        self.PosAttack = list()
-        self.PosDefence = list()
+        self.PosAttack = []
+        self.PosDefence = []
         self.kingPos = []
         self.king = None
         self.check = False
@@ -22,8 +22,8 @@ class Sides:
         self.DefenseVal = 0
         self.PosVal = 0
         self.PosMoves = []
-        self.PosAttack = list()
-        self.PosDefence = list()
+        self.PosAttack = []
+        self.PosDefence = []
         self.kingPos = []
         self.king = None
         self.check = False

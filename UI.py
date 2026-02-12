@@ -58,5 +58,4 @@ class button:
         return False
 
 def choose_file():
-    file_path = filedialog.askopenfilename()
-    return file_path
+    return filedialog.askopenfilename()

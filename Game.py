@@ -1,7 +1,8 @@
 import Engine
 import datetime
 import queue
-from multiprocessing import Process
+import TreeGraph
+import threading
 
 class Game():
     def __init__(self, turn, depth, pos = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"):
@@ -10,6 +11,7 @@ class Game():
         self.white.enemy = self.black
         self.black.enemy = self.white
         self.turn = turn
+        self.depth = depth
         now = datetime.datetime.now()
         self.date = now.strftime("%Y-%m-%d")
         self.time = now.strftime("%H-%M-%S")
@@ -23,11 +25,12 @@ class Game():
         self.winner = None
         self.learning = False
         self.idle_eval = False
-        self.idle_process = Process(target=self.idle_evaluation)
+        self.idle_thread = None
+        self.idle_stop_event = threading.Event()
         open(self.FileName,'x')
         try:
             open("App_data/Data.txt",'a')
-        except:
+        except Exception:
             open("App_data/Data.txt",'x')
         with open("App_data/Data.txt",'r') as file:
             self.lines = file.readlines()
@@ -35,11 +38,16 @@ class Game():
             for line in self.lines:
                 self.data.append(line.split(":"))
     def idle_evaluation(self):
-        self.bot.Depth.depth = self.bot.Depth.depth + 1
-        self.bot.Depth.DepthMap()
-        tree = self.bot.Depth.tree
-        self.idle_eval_tree = tree.root
+        if self.idle_stop_event.is_set():
+            return
+        idle_engine_side = self.bot.side.enemy
+        idle_engine_depth = self.bot.Depth.depth
+        cur_pos = self.bot.get_str_pos(self.curPos)
+        idle_engine = Engine.ChessEngine(idle_engine_depth, idle_engine_side, cur_pos)
+        idle_engine.Depth.DepthMap(self.curPos, idle_engine.Depth.tree.root)
+        self.idle_eval_tree = idle_engine.Depth.tree
         self.idle_eval = True
+        print("IDLE EVALUATION DONE")
 
     def write_move(self):
         with open(self.FileName, 'a') as file:
@@ -75,7 +83,10 @@ class Game():
     def play(self):
         self.write_move()
         if self.turn == self.bot.side:
-            self.idle_process.terminate()
+            if self.idle_thread is not None and self.idle_thread.is_alive():
+                self.idle_stop_event.set()
+                self.idle_thread = None
+                self.idle_stop_event.clear()
             move_found = False
             try:
                 with open("App_data/Data.txt",'r') as file:
@@ -89,22 +100,27 @@ class Game():
                             move_found = True
                             break
                 if not move_found:
-                    raise Exception  
-            except:
+                    raise Exception
+            except Exception:
                 if self.idle_eval:
-                    self.bot.Depth.find()
-                    next_move = self.bot.Depth.tree.root.next.next
+                    self.bot.Depth.tree.root = self.idle_eval_tree.search(self.bot.get_str_pos(self.curPos))
+                    print(self.bot.Depth.tree.root)
+                    self.bot.Depth.find(self.bot.Depth.tree.root)
+                    next_move = self.bot.Depth.tree.root.next
                 else:
                     next_move = self.bot.run()
                 self.bot.Depth.board_count = 0
                 self.bot.Depth.boards_analysed = 0
             if next_move == None:
-                print("Game ended")
                 self.checkmate()
-            self.curPos = next_move        
+            self.curPos = next_move
+            self.bot.Update_pos(self.curPos)
+            if self.idle_thread is None or not self.idle_thread.is_alive():
+                self.idle_stop_event.clear()
+                self.idle_thread = threading.Thread(target=self.idle_evaluation, daemon=True,)
+                self.idle_thread.start()
         else:
-            checkmate = self.GenBot.cleanPos()
-            if checkmate:
+            if self.GenBot.cleanPos():
                 self.checkmate()
             piece_valid= False
             while not piece_valid:
@@ -138,7 +154,6 @@ class Game():
                                 break
             self.curPos[y_coord_piece][x_coord_piece] = ' '
             self.curPos[y_coord_move][x_coord_move] = move_piece
-        self.bot.Update_pos(self.curPos)
-        self.GenBot.Update_pos(self.curPos)
+            self.GenBot.Update_pos(self.curPos)
         self.turn = self.turn.enemy
         return True
