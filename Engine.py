@@ -71,8 +71,13 @@ class ChessEngine:
         self.white.set_eval()
         self.black.set_eval()
         #Changes side to simulate it being the other side's turn
-        if self.side == self.white:return self.white.Eval, self.black.Eval
-        else: return self.black.Eval, self.white.Eval
+        if self.side == self.white:
+            ally_eval, enemy_eval = self.white.Eval, self.black.Eval
+            in_check = self.white.check
+        else: 
+            ally_eval, enemy_eval = self.black.Eval, self.white.Eval
+            in_check = self.black.check
+        return ally_eval, enemy_eval, in_check
     def REevaluate(self, lines):
         ready = False
         prev_eval = 0
@@ -181,25 +186,24 @@ class ChessEngine:
                         for move in CurPiece.posMove:
                             newBoard = self.copy_board() # Creates a copy of the board to modify without modifying original board
                             newBoard[y][x] = ' '
+                            CurPiece.posMove = []
                             if len(move) > 2: # [What rook to move, Where to move the king, Where to move the rook]
                                 newBoard[move[2][0]][move[2][1]] = Pieces.rook(CurPiece.colour, True)
                                 newBoard[move[1][0]][move[1][1]] = Pieces.king(CurPiece.colour, True)
                                 newBoard[move[0][0]][move[0][1]] = ' '
                             else:
-                                newY = move[0]
-                                newX = move[1]
+                                newY, newX = move
                                 if isinstance(CurPiece, Pieces.pawn): newBoard[newY][newX] = Pieces.pawn(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.bishop): newBoard[newY][newX] = Pieces.bishop(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.knight): newBoard[newY][newX] = Pieces.knight(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                                 elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
                                 elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
-                            self.evaluate(newBoard)
-                            if not col.check:
+                            a, b, in_check = self.evaluate(newBoard)
+                            if not in_check:
                                 posMate = False
                                 newMoves.append(move)
                             else:print("Move removed for" + str(CurPiece))
-                        CurPiece.posMove = []
                         CurPiece.posMove = newMoves
 
         if posMate:
@@ -281,8 +285,8 @@ class Depth(ChessEngine):
                                     elif isinstance(CurPiece, Pieces.rook): newBoard[newY][newX] = Pieces.rook(CurPiece.colour, True)
                                     elif isinstance(CurPiece, Pieces.queen): newBoard[newY][newX] = Pieces.queen(CurPiece.colour)
                                     elif isinstance(CurPiece, Pieces.king): newBoard[newY][newX] = Pieces.king(CurPiece.colour, True)
-                                self.evaluate(newBoard)
-                                if not col.check:
+                                a, b, in_check = self.evaluate(newBoard)
+                                if not in_check:
                                     posMate = False
                                     newMoves.append(move)
                             CurPiece.posMove = newMoves
@@ -347,7 +351,7 @@ class Depth(ChessEngine):
                         val = minEval
             return val
         else:
-            AllyVal, EnemyVal = self.evaluate(cur.content)
+            AllyVal, EnemyVal, in_check = self.evaluate(cur.content)
             if cur.checkmate:
                 if depth % 2 == 0: EnemyVal+= 1000-depth
                 else: AllyVal += 1000-depth            

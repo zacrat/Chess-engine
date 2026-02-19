@@ -27,13 +27,17 @@ class Tree():
         self.root = root
     def search(self, node, root = None):
         print("Searching tree...")
+        found = None
         curr = self.root if root is None else root
         str_curr = Engine.ChessEngine.get_str_pos(None, curr.getContent())
         if str_curr == node:
             print("Found node!")
             return curr
         for child in curr.children:
-            self.search(node,child)
+            found = self.search(node,child)
+            if found is not None:
+                return found
+        return found
 
 
         
