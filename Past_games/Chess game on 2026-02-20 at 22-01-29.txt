@@ -1,0 +1,6 @@
+RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr:12.0
+RNBQKBNRPPPPPPPP############################p###pppp#ppprnbqkbnr:13.25
+R#BQKBNRPPPPPPPP##N#########################p###pppp#ppprnbqkbnr:13.25
+R#BQKBNRPPPPPPPP##N#######################n#p###pppp#pppr#bqkbnr:17.0
+R#BQKBNRPPPP#PPP##N#########P#############n#p###pppp#pppr#bqkbnr:17.0
+R#BQKBNRPPPP#PPP##N#########P#########q###n#p###pppp#pppr#b#kbnr:26.5

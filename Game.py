@@ -1,7 +1,6 @@
 import Engine
 import datetime
 import queue
-import TreeGraph
 class Game():
     def __init__(self, turn, depth, pos = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"):
         self.white = Engine.Sides.WhiteSide()
@@ -29,9 +28,7 @@ class Game():
             open("App_data/Data.txt",'x')
         with open("App_data/Data.txt",'r') as file:
             self.lines = file.readlines()
-            self.data = []
-            for line in self.lines:
-                self.data.append(line.split(":"))
+            self.data = [line.split(":") for line in self.lines]
     def check_for_mate(self):
         if self.GenBot.cleanPos():
                 self.checkmate()
@@ -54,25 +51,21 @@ class Game():
                 self.winner = None
             file.close()
         if self.bot.side.check:
-            lines = []
-            with open(self.FileName,'r') as file:
-                for line in file.readlines():
-                    lines.append(line.split(":"))
-                file.close()
-            with open("App_data/Recently_evaluated.txt", "a") as file:
-                file.write(self.FileName+ "\n")
-                file.close()
-            self.learning = True
-            self.bot.REevaluate(lines)
-            self.learning = False
-        
-    def play(self):
-        self.check_for_mate()
-        self.write_move()
-        if self.turn == self.bot.side:
-            move_found = False
-            try:
-                with open("App_data/Data.txt",'r') as file:
+            self.Machine_learning()
+    
+    def Machine_learning(self):
+        lines = []
+        with open(self.FileName,'r') as file:
+            lines.extend(line.split(":") for line in file)
+        with open("App_data/Recently_evaluated.txt", "a") as file:
+            file.write(self.FileName+ "\n")
+            file.close()
+        self.learning = True
+        self.bot.REevaluate(lines)
+        self.learning = False
+    def Search_for_position(self, pos):
+        move_found = False
+        with open("App_data/Data.txt",'r') as file:
                     data = file.readlines()
                     for line in data:
                         move = line.split(":")
@@ -82,50 +75,61 @@ class Game():
                             next_move = self.bot.str_to_board(move[1])
                             move_found = True
                             break
-                if not move_found:
-                    raise BaseException
+        if not move_found:
+            raise BaseException
+    def bot_move(self):
+        next_move = self.bot.run()
+        self.bot.Depth.board_count = 0
+        self.bot.Depth.boards_analysed = 0
+        return next_move
+
+    def player_move(self, move):
+        if len(move) > 2:
+            y_coord_piece, x_coord_piece = move[3]
+            rR, cR = move[0]
+            r, c = move[1]
+            rRM, cRM = move[2]
+            move_piece = self.curPos[y_coord_piece][x_coord_piece]
+            self.curPos[rRM][cRM] = self.curPos[rR][cR]
+            self.curPos[rR][cR] = Engine.Pieces.empty()
+            y_coord_move = r
+            x_coord_move = c 
+        else:
+            from_pos, to_pos = move 
+            x_coord_piece = from_pos[1]
+            y_coord_piece = from_pos[0]
+            x_coord_move = to_pos[1]
+            y_coord_move = to_pos[0]
+            move_piece = self.curPos[y_coord_piece][x_coord_piece]
+            if isinstance(move_piece, Engine.Pieces.piece) and move_piece.colour == self.turn:
+                move_piece.posMove = []
+                move_piece.check(x_coord_piece, y_coord_piece, self.curPos)
+                possible_moves = move_piece.posMove
+                for move in possible_moves:
+                    r, c = move
+                    if r == y_coord_move and c == x_coord_move:
+                        break
+        self.curPos[y_coord_piece][x_coord_piece] = Engine.Pieces.empty()
+        self.curPos[y_coord_move][x_coord_move] = move_piece
+        self.GenBot.Update_pos(self.curPos)
+        
+    def play(self):
+        self.check_for_mate()
+        self.write_move()
+        if self.turn == self.bot.side:    
+            try:
+                next_move = self.Search_for_position(self.bot.get_str_pos(self.curPos))
             except BaseException:
-                next_move = self.bot.run()
-                self.bot.Depth.board_count = 0
-                self.bot.Depth.boards_analysed = 0
+                next_move = self.bot_move()
             if next_move is None:
                 self.checkmate()
             self.curPos = next_move
             self.bot.Update_pos(self.curPos)
-        else:
-            
+        else:   
             piece_valid= False
             while not piece_valid:
                 player_move = self.player_queue.get()
-                if len(player_move) > 2:
-                    y_coord_piece, x_coord_piece = player_move[3]
-                    rR, cR = player_move[0]
-                    r, c = player_move[1]
-                    rRM, cRM = player_move[2]
-                    move_piece = self.curPos[y_coord_piece][x_coord_piece]
-                    self.curPos[rRM][cRM] = self.curPos[rR][cR]
-                    self.curPos[rR][cR] = ' '
-                    y_coord_move = r
-                    x_coord_move = c
-                    piece_valid = True
-                else:
-                    from_pos, to_pos = player_move 
-                    x_coord_piece = from_pos[1]
-                    y_coord_piece = from_pos[0]
-                    x_coord_move = to_pos[1]
-                    y_coord_move = to_pos[0]
-                    move_piece = self.curPos[y_coord_piece][x_coord_piece]
-                    if isinstance(move_piece, Engine.Pieces.piece) and move_piece.colour == self.turn:
-                        piece_valid = True
-                        move_piece.posMove = []
-                        move_piece.check(x_coord_piece, y_coord_piece, self.curPos)
-                        possible_moves = move_piece.posMove
-                        for move in possible_moves:
-                            r, c = move
-                            if r == y_coord_move and c == x_coord_move:
-                                break
-            self.curPos[y_coord_piece][x_coord_piece] = ' '
-            self.curPos[y_coord_move][x_coord_move] = move_piece
-            self.GenBot.Update_pos(self.curPos)
+                self.player_move(player_move)
+                piece_valid = True
         self.turn = self.turn.enemy
         return True

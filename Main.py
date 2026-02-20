@@ -5,6 +5,7 @@ import sys
 import threading
 import UI
 import PGN_importer
+import itertools
 import os
 import tkinter as tk
 from tkinter import messagebox
@@ -22,13 +23,13 @@ def open_settings():
     pass
 
 def play_game():
-    flipped = False
     screen.fill((25,51,0))
-    Start = Game.Game(white, 2) 
+    Start = Game.Game(white, 3)
+    flipped = Start.bot.side == white
     if Start.bot.side == white:
-        flipped = True  
+        flipped = True
     game_thread = threading.Thread(target=game_loop, args=(Start,), daemon=True)
-    game_thread.start() 
+    game_thread.start()
     selected_square = None
     possible_moves = []
     while Start.ongoing:
@@ -71,39 +72,42 @@ def play_game():
                     possible_moves = []
                 else:
                     selected_square = [row, col]
-                    possible_moves = []  
-        for row in range(8):    
-            for col in range(8):
-                if flipped:symbol = cur_pos[7-row][7-col].__str__()
-                else: symbol = cur_pos[row][col].__str__()
-                text = font.render(symbol, True, (0, 0, 0))  
-                if [row, col] == selected_square:
-                    color = (255, 0, 0)
-                    board = Start.curPos
-                    if flipped:piece = board[7-row][7-col]
-                    else: piece = board[row][col]
-                    if isinstance(piece, Engine.Pieces.piece):
-                        possible_moves = piece.posMove
-                else:
-                    color = LIGHT if (row + col) % 2 == 0 else DARK
-                pygame.draw.rect( screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                screen.blit(text,(col * SQUARE_SIZE + SQUARE_SIZE // 4,row * SQUARE_SIZE + SQUARE_SIZE // 8))
-        for move in possible_moves:
-            if len(move) > 2:
-                r, c = move[1]
+                    possible_moves = []
+        for row, col in itertools.product(range(8), range(8)):
+            symbol = (
+                cur_pos[7 - row][7 - col].__str__()
+                if flipped
+                else cur_pos[row][col].__str__()
+            )
+            text = font.render(symbol, True, (0, 0, 0))
+            if [row, col] == selected_square:
+                color = (255, 0, 0)
+                board = Start.curPos
+                if flipped:piece = board[7-row][7-col]
+                else: piece = board[row][col]
+                if isinstance(piece, Engine.Pieces.piece) and piece.colour != Start.bot.side:
+                    possible_moves = piece.posMove
             else:
-                r, c = move
+                color = LIGHT if (row + col) % 2 == 0 else DARK
+            pygame.draw.rect( screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+            screen.blit(text,(col * SQUARE_SIZE + SQUARE_SIZE // 4,row * SQUARE_SIZE + SQUARE_SIZE // 8))
+        for move in possible_moves:
+            r, c = move[1] if len(move) > 2 else move
             if flipped:
                 r = 7-r
                 c = 7-c
             pygame.draw.circle(screen,  (0, 255, 0),(c * SQUARE_SIZE + SQUARE_SIZE // 2, r * SQUARE_SIZE + SQUARE_SIZE // 2),SQUARE_SIZE // 4)
         info = [
-            "Bot depth : "+str(Start.bot.Depth.depth), 
-            "Date : " + str(Start.date), 
-            "Time : " + str(Start.time), 
-            "Turn : " + str(Start.turn), 
-            "Player side : " +str(Start.GenBot.side),
-            "Bot progress : " + str(Start.bot.Depth.boards_analysed) + " / " + str(Start.bot.Depth.board_count)]
+            f"Bot depth : {str(Start.bot.Depth.depth)}",
+            f"Date : {str(Start.date)}",
+            f"Time : {str(Start.time)}",
+            f"Turn : {str(Start.turn)}",
+            f"Player side : {str(Start.GenBot.side)}",
+            "Bot progress : "
+            + str(Start.bot.Depth.boards_analysed)
+            + " / "
+            + str(Start.bot.Depth.board_count),
+        ]
         Flip_button.draw(screen)
         Home_button.draw(screen)
         INFO_BOX.draw(screen, info)

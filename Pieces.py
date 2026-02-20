@@ -7,9 +7,9 @@ class piece:
         self.colour = colour
         self.posMove =[]
     def reset(self):
-        self.__init__(self.colour,self.hasMoved, self.val)
+        self.posMove = []
     def check(self, x, y, board):
-        self.check(x, y, board)
+        raise NotImplementedError("Subclasses of 'piece' must implement check()")
 
 class pawn(piece):
     def __init__(self, colour=None,hasMoved = False, val = 1):
@@ -30,9 +30,8 @@ class pawn(piece):
                     [0.75,1,1.25,1.5,1.5,1.25,1,0.75], 
                     [1,1.25,1.5,1.75,1.75,1.5,1.25,1], 
                     [2,2,2,2,2,2,2,2],
-                    [0,0,0,0,0,0,0,0]] 
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2659"
-        else: self.icon = "\u265F"
+                    [0,0,0,0,0,0,0,0]]
+        self.icon = "\u2659" if isinstance(colour, Sides.WhiteSide) else "\u265F"
     def __str__(self): return self.icon
     def check(self,x,y,board):
             AttackVal = 0
@@ -48,11 +47,10 @@ class pawn(piece):
                 PosVal = self.mapBlack[y][x]
                 ToCheckY = ToCheckBlackY
                 startLevel = 1
-            if 0<y+ToCheckY[0]<8:
-                if not isinstance(board[y+ToCheckY[0]][x], piece):
-                    self.posMove.append([y+ToCheckY[0],x])
-                    if y == startLevel and not isinstance(board[y+2*(ToCheckY[0])][x], piece):
-                        self.posMove.append([y+2*(ToCheckY[0]),x])
+            if 0<y+ToCheckY[0]<8 and not isinstance(board[y+ToCheckY[0]][x], piece):
+                self.posMove.append([y+ToCheckY[0],x])
+                if y == startLevel and not isinstance(board[y+2*(ToCheckY[0])][x], piece):
+                    self.posMove.append([y+2*(ToCheckY[0]),x])
             for i in range(2):
                 if 0<y+ToCheckY[i]<8 and 0<x+ToCheckX[i]<8:
                     checking = board[y+ToCheckY[i]][x+ToCheckX[i]]
@@ -77,8 +75,7 @@ class rook(piece):
                     [0,0.25,0.5,0.75,0.75,0.5,0.25,0],
                     [-0.25,0,0.25,0.5,0.5,0.25,0,-0.25]]
         self.hasMoved = hasMoved
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2656"
-        else: self.icon = "\u265C"
+        self.icon = "\u2656" if isinstance(colour, Sides.WhiteSide) else "\u265C"
     def __str__(self): return self.icon
     def check(self,x,y,board):
         AttackVal = 0
@@ -156,8 +153,7 @@ class knight(piece):
                     [-0.25, 0, 0.25,0.5,0.5,0.25, 0, -0.25], 
                     [-0.5, -0.25, 0,0.25,0.25,0,-0.25,-0.5],
                     [-0.75,-0.5,-0.25,0,0,-0.25,-0.5,-0.75]]
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2658"
-        else: self.icon = "\u265E"
+        self.icon = "\u2658" if isinstance(colour, Sides.WhiteSide) else "\u265E"
     def __str__(self): return self.icon
     def check(self,x,y,board):
         AttackVal = 0
@@ -189,8 +185,7 @@ class bishop(piece):
                     [0, 0.25, 0.5, 0.75, 0.75, 0.5, 0.25, 0], 
                     [-0.5, -0.25 ,0, 0.25, 0.25, 0, -0.25, -0.5],
                     [-1, -0.5, 0, 0.5, 0.5, 0, -0.5, -1]]
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2657"
-        else: self.icon = "\u265D"
+        self.icon = "\u2657" if isinstance(colour, Sides.WhiteSide) else "\u265D"
     def __str__(self): return self.icon
     def check(self,x,y,board):
         AttackVal = 0
@@ -273,10 +268,10 @@ class queen(piece):
                     [0.5,1,1.5,2,2,1.5,1,0.5], 
                     [0.25,0.75,1.25,1.75,1.75,1.25,0.75,0.25],
                     [0,0.25,0.5,0.75,0.75,0.5,0.25,0]]
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2655"
-        else: self.icon = "\u265B"
+        self.icon = "\u2655" if isinstance(colour, Sides.WhiteSide) else "\u265B"
     def __str__(self): return self.icon
     def check(self,x,y,board):
+        self.posMove = []
         temp_rook = rook(self.colour)
         straightVal = temp_rook.check(x, y, board)
         temp_bishop = bishop(self.colour)
@@ -306,13 +301,12 @@ class king(piece):
                     [-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75,-1.75],
                     [-2,-2,-2,-2,-2,-2,-2,-2]]
         self.hasMoved = hasMoved
-        if isinstance(colour, Sides.WhiteSide):self.icon = "\u2654"
-        else: self.icon = "\u265A"
+        self.icon = "\u2654" if isinstance(colour, Sides.WhiteSide) else "\u265A"
     def __str__(self): return self.icon 
     def check(self,x,y,board):
         AttackVal = 0
         DefenseVal = 0
-        CastlePositions =  [] 
+        CastlePositions =  []
         ToCheckX = [-1,0,1,1,1,0,-1,-1]
         ToCheckY = [-1,-1,-1,0,1,1,1,0]
         match isinstance(self.colour, Sides.WhiteSide):
@@ -323,11 +317,11 @@ class king(piece):
             except:continue
             if (0<=y+ToCheckY[i]<=len(board) and 0<=x+ToCheckX[i]<=len(board[0])):
                 if isinstance(checking, piece):
-                    if checking.colour != self.colour:
+                    if checking.colour == self.colour:
+                        DefenseVal += checking.val
+                    else:
                         AttackVal += checking.val
                         self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
-                    else:
-                        DefenseVal += checking.val
                 else:
                     self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
         if self.hasMoved == False:
@@ -337,21 +331,24 @@ class king(piece):
                 Curpiece = board[y][cX]
                 if isinstance(Curpiece,rook) and Curpiece.colour == self.colour:
                     rooksFound += 1
-                    if  not Curpiece.hasMoved:
-                        if cX < x:order = -1
-                        else: order = 1
+                    if not Curpiece.hasMoved:
+                        order = -1 if cX < x else 1
                         for place in range(x+order, cX, order):
-                            if board[y][place] == ' ':
+                            if isinstance(board[y][place], empty):
                                 castle = True
                             else:
                                 castle = False
                                 break
                         if castle:         
                             kingCastlePos = round((cX+x)/2)
-                            if cX < x: rookCastlePos = kingCastlePos+1
-                            else: rookCastlePos = kingCastlePos-1
+                            rookCastlePos = kingCastlePos+1 if cX < x else kingCastlePos-1
                             self.posMove.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])
                             CastlePositions.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])# [What rook to move, Where to move the king, Where to move the rook]
                 if rooksFound == 2:
                     break
         return [AttackVal, PosVal, DefenseVal, self.posMove, CastlePositions]
+class empty:
+    def __init__(self):
+         self.val = 0
+         self.colour = None
+    def __str__(self): return " "

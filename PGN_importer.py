@@ -7,7 +7,7 @@ def scan(path):
     pgn = open(path, 'r')
     pgn_lines = StringIO(pgn.read())
     game = chess.pgn.read_game(pgn_lines)
-    for number, move in enumerate(game.mainline_moves()):
+    for move in game.mainline_moves():
         vboard.push(move)
         print(FEN_to_STR(vboard.fen()))
 
@@ -19,13 +19,10 @@ def FEN_to_STR(fen):
         elif chr == " ":
             break
         elif check_int(chr):
-            for num in range(int(chr)):
-                str_form = str_form + "#"
+            for _ in range(int(chr)):
+                str_form = f"{str_form}#"
         else:
-            if chr.isupper():
-                str_form = str_form + chr.lower()
-            else:
-                str_form = str_form + chr.upper()
+            str_form = str_form + chr.lower() if chr.isupper() else str_form + chr.upper()
     return str_form
 def STR_to_FEN(string):
     fen_form = ""
@@ -36,18 +33,15 @@ def STR_to_FEN(string):
             if curr_streak>0:
                 fen_form = fen_form + str(curr_streak)
                 curr_streak = 0
-            fen_form = fen_form + "/"
-            count = 0 
+            fen_form = f"{fen_form}/"
+            count = 0
         if chr == "#":
             curr_streak += 1
-        elif chr != "#":
+        else:
             if curr_streak > 0:
                 fen_form = fen_form + str(curr_streak)
                 curr_streak = 0
-            if chr.isupper():
-                fen_form = fen_form + chr.lower()
-            else:
-                fen_form = fen_form + chr.upper()
+            fen_form = fen_form + chr.lower() if chr.isupper() else fen_form + chr.upper()
         count+=1
     return fen_form
 
