@@ -1,5 +1,6 @@
 class Sides:
     def __init__(self):
+        # Initializes the side with default values for evaluation, piece value, attack value, defense value, position value, possible moves, possible attacks, possible defenses, king position, and castle positions
         self.Eval = None
         self.pieceVal = 0
         self.AttackVal = 0
@@ -16,6 +17,7 @@ class Sides:
         self.Eval = self.pieceVal +self.AttackVal + self.PosVal
 
     def reset(self):
+        # Resets the evaluation and positional values for the side
         self.Eval = None
         self.pieceVal = 0
         self.AttackVal = 0

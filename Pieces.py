@@ -1,7 +1,9 @@
 import Sides
 
+# base class for all chess pieces, stores colour, value, movement list
 class piece:
     def __init__(self, colour = None, val = 0, hasMoved = False): # intitalises the piece object with relevant values and properties.
+        # colour: side instance; val: material value; hasMoved: tracks castling
         self.hasMoved = hasMoved
         self.val = val
         self.colour = colour
@@ -49,15 +51,16 @@ class pawn(piece):
                 startLevel = 1
             if 0<y+ToCheckY[0]<8 and not isinstance(board[y+ToCheckY[0]][x], piece):
                 self.posMove.append([y+ToCheckY[0],x])
-                if y == startLevel and not isinstance(board[y+2*(ToCheckY[0])][x], piece):
-                    self.posMove.append([y+2*(ToCheckY[0]),x])
+                if y == startLevel and not isinstance(board[y+2*(ToCheckY[0])][x], piece): 
+                    self.posMove.append([y+2*(ToCheckY[0]),x]) # allows the pawn to move two squares forward on its first move, if both squares are unoccupied
             for i in range(2):
+                # Checks for possible attacks
                 if 0<y+ToCheckY[i]<8 and 0<x+ToCheckX[i]<8:
                     checking = board[y+ToCheckY[i]][x+ToCheckX[i]]
-                    if isinstance(checking, piece):
+                    if isinstance(checking, piece): 
                         if checking.colour != self.colour:
                             AttackVal += checking.val
-                            self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
+                            self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]]) # allows the pawn to move diagonally to capture an enemy piece
                         else:
                             DefenseVal+= checking.val
 
@@ -90,8 +93,8 @@ class rook(piece):
                 try:
                     checking = board[y][x+i]
                     if (0<=x+i<=len(board[0])):
-                        if isinstance(checking, piece):
-                            if checking.colour != self.colour:
+                        if isinstance(checking, piece): # Checks if square is occupied
+                            if checking.colour != self.colour:# Checks if piece is an enemy piece
                                 AttackVal += checking.val
                                 self.posMove.append([y, x+i])
                             else:
@@ -103,8 +106,8 @@ class rook(piece):
                 try:
                     if (0<=y+i<=len(board)):
                         checking = board[y+i][x]
-                        if isinstance(checking, piece):
-                            if checking.colour != self.colour:
+                        if isinstance(checking, piece): # Checks if square is occupied
+                            if checking.colour != self.colour: # Checks if piece is an enemy piece
                                 AttackVal += checking.val
                                 self.posMove.append([y+i, x])
                             else:
@@ -117,8 +120,8 @@ class rook(piece):
                 try:
                     if (0<=x-i<=len(board[0])):
                         checking = board[y][x-i]
-                        if isinstance(checking, piece):
-                            if checking.colour != self.colour:
+                        if isinstance(checking, piece): # Checks if square is occupied
+                            if checking.colour != self.colour: # Checks if piece is an enemy piece
                                 AttackVal += checking.val
                                 self.posMove.append([y, x-i])      
                             else:
@@ -131,8 +134,8 @@ class rook(piece):
                 try:
                     if (0<=y-i<=len(board)):
                         checking = board[y-i][x]
-                        if isinstance(checking, piece):
-                            if checking.colour != self.colour:
+                        if isinstance(checking, piece): # Checks if square is occupied
+                            if checking.colour != self.colour: # Checks if piece is an enemy piece
                                 AttackVal += checking.val
                                 self.posMove.append([y-i, x])
                             else:
@@ -159,8 +162,9 @@ class knight(piece):
         AttackVal = 0
         PosVal = self.map[y][x]
         DefenseVal = 0
-        ToCheckX = [2,2,-2,-2,1,1,-1,-1]
-        ToCheckY = [1,-1,1,-1,2,-2,-2,2]
+        ToCheckX = [2,2,-2,-2,1,1,-1,-1] # relative x and y coordinates of knight moves
+        ToCheckY = [1,-1,1,-1,2,-2,-2,2] 
+        # iterate through possible moves, checking for validity and whether they are attacking an enemy piece, defended by an ally piece, or an empty square
         for i in range(len(ToCheckX)):
             if not (0<=y+ToCheckY[i]<=len(board) and 0<=x+ToCheckX[i]<=len(board[0])):continue
             try:checking = board[y+ToCheckY[i]][x+ToCheckX[i]]
@@ -200,7 +204,7 @@ class bishop(piece):
                 if (0<=y+i<=len(board) and 0<=x+i<=len(board[0])): 
                     try:
                         checking = board[y+i][x+i]
-                        if isinstance(checking, piece):
+                        if isinstance(checking, piece): # Checks if square is occupied
                             if checking.colour != self.colour:
                                 AttackVal += checking.val
                                 self.posMove.append([y+i, x+i])
@@ -215,7 +219,7 @@ class bishop(piece):
                 if (0<=y-i<=len(board) and 0<=x+i<=len(board[0])): 
                     try:
                         checking = board[y-i][x+i]
-                        if isinstance(checking, piece):
+                        if isinstance(checking, piece):# Checks if square is occupied
                             if checking.colour != self.colour:
                                 AttackVal += checking.val
                                 self.posMove.append([y-i, x+i])
@@ -230,7 +234,7 @@ class bishop(piece):
                 if (0<=y-i<=len(board) and 0<=x-i<=len(board[0])):     
                     try:
                         checking = board[y-i][x-i]
-                        if isinstance(checking, piece):
+                        if isinstance(checking, piece):# Checks if square is occupied
                             if checking.colour != self.colour:
                                 AttackVal += checking.val
                                 self.posMove.append([y-i, x-i])
@@ -245,7 +249,7 @@ class bishop(piece):
                 if (0<=y+i<=len(board) and 0<=x-i<=len(board[0])):
                     try:
                         checking = board[y+i][x-i]
-                        if isinstance(checking, piece):
+                        if isinstance(checking, piece):# Checks if square is occupied
                             if checking.colour != self.colour:
                                 AttackVal += checking.val
                                 self.posMove.append([y+i, x-i])
@@ -272,10 +276,12 @@ class queen(piece):
     def __str__(self): return self.icon
     def check(self,x,y,board):
         self.posMove = []
+        # Utilises the movement of the rook and bishop combined, as the queen can move in straight lines and diagonals
         temp_rook = rook(self.colour)
         straightVal = temp_rook.check(x, y, board)
         temp_bishop = bishop(self.colour)
         DiagVal = temp_bishop.check(x, y, board)
+        # combines the move lists and evaluations of the rook and bishop, to get the full move list and evaluation for the queen
         self.posMove = straightVal[3] + DiagVal[3]
         AttackVal = straightVal[0] + DiagVal[0]
         PosVal = straightVal[1]
@@ -325,29 +331,31 @@ class king(piece):
                 else:
                     self.posMove.append([y+ToCheckY[i], x+ToCheckX[i]])
         if self.hasMoved == False:
-            rooksFound = 0
+            # Castling possible
+            rooksFound = 0 # Keeps track of whether we've found the king's rook, queen's rook, or both, to avoid unnecessary checks after finding both rooks or the relevant rook for the side we're on
             castle = False
             for cX in range(8):
                 Curpiece = board[y][cX]
                 if isinstance(Curpiece,rook) and Curpiece.colour == self.colour:
                     rooksFound += 1
                     if not Curpiece.hasMoved:
-                        order = -1 if cX < x else 1
-                        for place in range(x+order, cX, order):
+                        order = -1 if cX < x else 1 # Determines whether to check squares to the left or right of the king, depending on which rook we're looking at
+                        for place in range(x+order, cX, order): 
                             if isinstance(board[y][place], empty):
                                 castle = True
                             else:
                                 castle = False
                                 break
                         if castle:         
-                            kingCastlePos = round((cX+x)/2)
-                            rookCastlePos = kingCastlePos+1 if cX < x else kingCastlePos-1
+                            kingCastlePos = round((cX+x)/2) # Position the king moves to when castling, which is always halfway between the rook and king's starting positions
+                            rookCastlePos = kingCastlePos+1 if cX < x else kingCastlePos-1 # Position the rook moves to when castling, which is always on the opposite side of the king from the rook's starting position
                             self.posMove.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])
                             CastlePositions.append([[y,cX], [y ,kingCastlePos], [y, rookCastlePos]])# [What rook to move, Where to move the king, Where to move the rook]
                 if rooksFound == 2:
                     break
         return [AttackVal, PosVal, DefenseVal, self.posMove, CastlePositions]
 class empty:
+    # represents an empty square on the board, used to simplify move generation and board representation
     def __init__(self):
          self.val = 0
          self.colour = None
